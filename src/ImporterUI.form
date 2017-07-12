@@ -147,7 +147,7 @@
             </constraints>
             <properties>
               <editable value="false"/>
-              <text value="C:\Users\Chris\Desktop\LEX - Wierciński Jacek (red.), Kodeks rodzinny i opiekuńczy. Komentarz_files"/>
+              <text value="C:\"/>
             </properties>
           </component>
           <component id="d19a5" class="javax.swing.JButton" binding="chooseFolderButton">

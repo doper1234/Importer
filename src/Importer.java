@@ -32,8 +32,10 @@ public class Importer {
 
     public PortableDevice[] getPortableDevices() {
 
-        //if (portableDevices == null) {
-            PortableDeviceManager manager = new PortableDeviceManager();
+
+            //if (portableDevices == null) {
+        PortableDeviceManager manager = null;
+            manager = new PortableDeviceManager();
             portableDevices = manager.getDevices();
         //}
 

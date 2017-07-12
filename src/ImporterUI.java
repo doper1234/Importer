@@ -71,6 +71,9 @@ public class ImporterUI extends JFrame{
         if(files.length <=0){
             JOptionPane.showMessageDialog(this, "No files selected!");
         }
+        else if(files[0].equalsIgnoreCase("No files found")){
+            JOptionPane.showMessageDialog(this, "No files found on device!");
+        }
         else if(BasicHelp.askQuestion("Import "+files.length+" files from " + devicesComboBox.getSelectedItem() + "?", "Import")){
             importer.importFiles(getDevice(), this, destinationFolderTextField.getText(), files, files.length);
             importPanel.setVisible(false);
@@ -195,8 +198,8 @@ public class ImporterUI extends JFrame{
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
         setFocusable(true);
-        setLocationRelativeTo(null);
         setSize(1000,500);
+        setLocationRelativeTo(null);
 
         addKeyListener(new KeyAdapter() {
             @Override

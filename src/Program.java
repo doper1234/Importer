@@ -1,4 +1,5 @@
 import jmtp.PortableDevice;
+import jmtp.PortableDeviceManager;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -32,9 +33,8 @@ public class Program {
             i++;
         }*/
         }
-        catch(Exception e){
+        catch(Throwable e){
             new ExceptionForm(e);
         }
-
     }
 }

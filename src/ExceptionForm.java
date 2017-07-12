@@ -6,31 +6,28 @@ import java.io.StringWriter;
  * Created by Chris on 2017-07-06.
  */
 public class ExceptionForm extends JFrame{
-    private final String message;
-    private final Class<? extends Exception> aClass;
-    private final Exception exception;
-    private JPanel headerPanel;
-    private JPanel causePanel;
-    private JPanel stacktracePanel;
-    private JLabel exceptionTypLabel;
+    private UnsatisfiedLinkError unsatisfiedLinkError;
+    private String message;
+    private Throwable m_Throwable;
     private JTextArea exceptionStacktraceArea;
-    private JLabel causeLabel;
     private JPanel mainPanel;
 
-    public ExceptionForm(Exception e){
-        this.exception = e;
-        this.message = e.getMessage();
-        this.aClass = e.getClass();
+    public ExceptionForm(Throwable Throwable){
+        m_Throwable = Throwable;
+        message = Throwable.getMessage();
         initForm();
         initExceptionData();
     }
 
     private void initExceptionData() {
-        exceptionTypLabel.setText(aClass.getName());
+
         System.out.println(message);
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
-        exception.printStackTrace(pw);
+        if(m_Throwable != null)
+            m_Throwable.printStackTrace(pw);
+        else if(unsatisfiedLinkError !=null)
+            unsatisfiedLinkError.printStackTrace(pw);
         System.out.println(sw.toString());
         exceptionStacktraceArea.append(sw.toString());
 
@@ -41,8 +38,8 @@ public class ExceptionForm extends JFrame{
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
         setFocusable(true);
-        setLocationRelativeTo(null);
         setSize(500,500);
+        setLocationRelativeTo(null);
     }
 
 }

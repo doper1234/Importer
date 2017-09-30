@@ -1,8 +1,9 @@
+package Help;
+
 import be.derycke.pieter.com.Guid;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,8 +13,6 @@ import java.util.List;
  * Created by Chris on 2017-07-02.
  */
 public class BasicHelp {
-
-    public static String tempFileLocation = "C:\\Users\\Chris\\Desktop\\Temp";//"C\\Temp\\Pictures";
 
     public static Boolean askQuestion(String sQuestion, String sTitle) {
         return (JOptionPane.showConfirmDialog(null, sQuestion, sTitle, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION);
@@ -30,9 +29,13 @@ public class BasicHelp {
         }*/
         ImageIcon imageIcon = new ImageIcon(sName);
         Image image = imageIcon.getImage(); // transform it
-        Image newimg = image.getScaledInstance(image.getWidth(null) / 15, image.getHeight(null) / 15, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
-
-        return new ImageIcon(newimg);
+        int iWidthImage = image.getWidth(null);
+        int iHeightImage = image.getHeight(null);
+        if(iWidthImage > 0 && iHeightImage > 0) {
+            Image newimg = image.getScaledInstance(iWidthImage / 15, iHeightImage / 15, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
+            return new ImageIcon(newimg);
+        }
+        return null;
     }
 
     public static double round(double value, int places) {
@@ -58,13 +61,13 @@ public class BasicHelp {
 
         CreateTempIfNotExists();
 
-        String sPath = tempFileLocation + "\\" + sFileName;
+        String sPath = FileData.tempFileLocation + "\\" + sFileName;
         File f = new File(sPath);
         if (f.exists() && !f.isDirectory()) {
             return sPath;
         } else {
             try {
-                return File.createTempFile(tempFileLocation, sFileName).getPath();
+                return File.createTempFile(FileData.tempFileLocation, sFileName).getPath();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -74,11 +77,11 @@ public class BasicHelp {
     }
 
     public static void CreateTempIfNotExists() {
-        File theDir = new File(tempFileLocation);
+        File theDir = new File(FileData.tempFileLocation);
 
 // if the directory does not exist, create it
         if (!theDir.exists()) {
-            System.out.println("creating directory: " + theDir.getName());
+            Logger.log("creating directory: " + theDir.getName());
             boolean result = false;
 
             try {
@@ -88,7 +91,7 @@ public class BasicHelp {
                 //handle it
             }
             if (result) {
-                System.out.println("DIR created");
+                Logger.log("DIR created");
             }
         }
     }
@@ -164,6 +167,31 @@ public class BasicHelp {
                 result.add(item);
 
         return result.toArray(input);
+    }
+
+    public static String getFileDirectory(String sFilePath){
+        if(sFilePath.contains(".")){
+            String[] aSplit = sFilePath.split("\\\\");
+            aSplit[aSplit.length-1] = "";
+            return String.join("\\\\", aSplit);
+        }
+        else
+            return sFilePath;
+    }
+
+    public static String padLeft(int iNumberToPad, int iAmountToPad){
+        return String.format("%0"+iAmountToPad+"d", iNumberToPad);
+    }
+
+    public static void showMessage(String sMessage, String sTitle) {
+
+        JOptionPane.showMessageDialog(null, sMessage, sTitle, JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public static boolean containsHanScript(String s) {
+        return s.codePoints().anyMatch(
+                codepoint ->
+                        Character.UnicodeScript.of(codepoint) == Character.UnicodeScript.HAN);
     }
 }
 

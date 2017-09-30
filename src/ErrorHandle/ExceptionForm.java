@@ -1,3 +1,7 @@
+package ErrorHandle;
+
+import Help.Logger;
+
 import javax.swing.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -21,14 +25,14 @@ public class ExceptionForm extends JFrame{
 
     private void initExceptionData() {
 
-        System.out.println(message);
+        Logger.log(message);
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         if(m_Throwable != null)
             m_Throwable.printStackTrace(pw);
         else if(unsatisfiedLinkError !=null)
             unsatisfiedLinkError.printStackTrace(pw);
-        System.out.println(sw.toString());
+        Logger.log(sw.toString());
         exceptionStacktraceArea.append(sw.toString());
 
     }

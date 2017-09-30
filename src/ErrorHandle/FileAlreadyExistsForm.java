@@ -1,7 +1,8 @@
+package ErrorHandle;
+
+import Help.BasicHelp;
+
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
 
 /**
  * Created by Chris on 2017-07-03.
@@ -45,13 +46,16 @@ public class FileAlreadyExistsForm {
         m_sPathToFileInDestination = sPathToFileInDestination;
 
         ImageIcon imageIconDestination = BasicHelp.resizedImage(sPathToFileInDestination, 120,120);
-        imageInFileIconLabel.setIcon(imageIconDestination);
-        imageInFilePanel.repaint();
+        if(imageIconDestination != null) {
+            imageInFileIconLabel.setIcon(imageIconDestination);
+            imageInFilePanel.repaint();
+        }
 
         ImageIcon imageIconDevice =  BasicHelp.resizedImage (sPathToFileOnDevice, 120,120);
-        imageOnDeviceIconLabel.setIcon(imageIconDevice);
-        imageOnDevicePanel.repaint();
-
+        if(imageIconDevice != null) {
+            imageOnDeviceIconLabel.setIcon(imageIconDevice);
+            imageOnDevicePanel.repaint();
+        }
     }
 
     private void initButtons(){

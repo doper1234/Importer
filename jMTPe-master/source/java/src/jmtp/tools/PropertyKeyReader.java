@@ -38,7 +38,7 @@ import be.derycke.pieter.com.Guid;
 public class PropertyKeyReader {
     
     private static final String HEADER_FILE = 
-            "C:\\Documents and Settings\\Pieter De Rycke\\Bureaublad\\Include\\PortableDevice.h";
+            "C:\\Documents and Help.Settings\\Pieter De Rycke\\Bureaublad\\Include\\PortableDevice.h";
     
     private static final boolean PRINT_COMMENTS = false;
     

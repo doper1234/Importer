@@ -1,6 +1,7 @@
 package ErrorHandle;
 
 import Help.Logger;
+import Help.MyJFrame;
 
 import javax.swing.*;
 import java.io.PrintWriter;
@@ -9,7 +10,7 @@ import java.io.StringWriter;
 /**
  * Created by Chris on 2017-07-06.
  */
-public class ExceptionForm extends JFrame{
+public class ExceptionForm extends MyJFrame {
     private UnsatisfiedLinkError unsatisfiedLinkError;
     private String message;
     private Throwable m_Throwable;
@@ -17,10 +18,15 @@ public class ExceptionForm extends JFrame{
     private JPanel mainPanel;
 
     public ExceptionForm(Throwable Throwable){
+        super();
         m_Throwable = Throwable;
         message = Throwable.getMessage();
-        initForm();
         initExceptionData();
+    }
+
+    @Override
+    public JPanel mainPanel() {
+        return mainPanel;
     }
 
     private void initExceptionData() {
@@ -36,14 +42,4 @@ public class ExceptionForm extends JFrame{
         exceptionStacktraceArea.append(sw.toString());
 
     }
-
-    private void initForm() {
-        setContentPane(mainPanel);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setVisible(true);
-        setFocusable(true);
-        setSize(500,500);
-        setLocationRelativeTo(null);
-    }
-
 }

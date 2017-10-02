@@ -2,6 +2,7 @@ package DeviceDataManager;
 
 import Help.*;
 import Importer.*;
+import Settings.Settings;
 import be.derycke.pieter.com.COMException;
 import jmtp.*;
 

@@ -1,4 +1,8 @@
-package Help;
+package Settings;
+
+import Help.BasicHelp;
+import Help.Logger;
+import Help.PredefinedDevice;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +27,7 @@ public class Settings {
 
 
     private static List<PredefinedDevice> _predefinedDevices;
-    private static int  _scanForDevicesFrequency = 10000000;
+    private static long _scanForDevicesFrequency = 10000000;
 
 
     private static  File getSettingsFile() throws IOException {
@@ -87,7 +91,7 @@ public class Settings {
     }
 
 
-    public static int getCheckForNewDevicesFrequency(){
+    public static long getCheckForNewDevicesFrequency(){
 
         return _scanForDevicesFrequency;
     }
@@ -100,8 +104,10 @@ public class Settings {
         return null;
     }
 
-    public static void saveFrequencySettings(int iScanForDevicesFrequency) {
-        _scanForDevicesFrequency = iScanForDevicesFrequency;
+    public static void saveFrequencySettings(int iSeconds) {
+        // 1 *   // minutes to sleep
+        //60 *   // seconds to a minute
+        _scanForDevicesFrequency = iSeconds * 1000;
         saveSettings();
 
     }

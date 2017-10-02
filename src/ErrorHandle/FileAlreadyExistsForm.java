@@ -17,28 +17,12 @@ public class FileAlreadyExistsForm {
     public JPanel mainPanel;
     private JLabel imageOnDeviceIconLabel;
     private JLabel imageInFileIconLabel;
-    private String rename;
     private String m_sPathToFileInDestination;
     private String m_sDirectory;
-    private String oldName;
 
     public FileAlreadyExistsForm(String sDirectory, String fileInDestination, String fileOnDevice) {
         m_sDirectory = sDirectory;
-        initForm();
-        initButtons();
         initImages(fileInDestination, fileOnDevice);
-        //JOptionPane.showConfirmDialog(null, mainPanel, "JOptionPane Example : ", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        //JOptionPane.showOptionDialog();
-}
-
-    private void initForm() {
-
-        //setContentPane(mainPanel);
-        //setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        //setVisible(true);
-        //setFocusable(true);
-        //setLocationRelativeTo(null);
-        //setSize(500,500);
     }
 
     private void initImages(String sPathToFileInDestination, String sPathToFileOnDevice) {
@@ -58,22 +42,16 @@ public class FileAlreadyExistsForm {
         }
     }
 
-    private void initButtons(){
-       /* yesButton.addActionListener(e -> exit(0));
-        noButton.addActionListener(e -> exit(1));
-        renameButton.addActionListener(e -> exit(2));*/
-    }
-
-    public int getOption(){
+    public int getOption() {
 
         int iOption = JOptionPane.showOptionDialog(null, mainPanel, "Attention!",
                 JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
                 null, new String[]{"Yes", "No", "Rename"}, null);
 
-        if(iOption == JOptionPane.CANCEL_OPTION) {
+        if (iOption == JOptionPane.CANCEL_OPTION) {
             iOption = JOptionPane.YES_OPTION;
 
-            String sNewName = null;
+            String sNewName;
             do {
                 sNewName = JOptionPane.showInputDialog("Enter new file name");
                 if (sNewName == null)
@@ -81,27 +59,7 @@ public class FileAlreadyExistsForm {
             }
             while (!BasicHelp.renameFile(m_sDirectory, getOldName(), sNewName));
         }
-
         return (iOption);
-
-    }
-
-
-    private void exit(int iOption) {
-        switch (iOption) {
-            case 0:
-                //yes, overwrite
-                break;
-            case 1:
-                //no, don't copy
-                break;
-            case 2:
-                break;
-        }
-    }
-
-    public String getRename() {
-        return rename;
     }
 
     public String getOldName() {

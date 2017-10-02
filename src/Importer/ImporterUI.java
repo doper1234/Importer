@@ -2,6 +2,7 @@ package Importer;
 
 import DeviceDataManager.DeviceDataManager;
 import Help.*;
+import Settings.Settings;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -15,7 +16,7 @@ import java.util.List;
 /**
  * Created by Chris on 2017-07-01.
  */
-public class ImporterUI extends JFrame{
+public class ImporterUI extends MyJFrame{
 
     //ui components
     private JComboBox devicesComboBox;
@@ -56,11 +57,16 @@ public class ImporterUI extends JFrame{
     public final int CHECKBOX_COLUMN = 0;
     public final int IMAGE_COLUMN = 1;
 
+    @Override
+    public JPanel mainPanel() {
+        return panel1;
+    }
+
     public ImporterUI(){
         super ("Import files");
         importer = new Importer();
         _deviceDataManager = new DeviceDataManager();
-        initForm();
+        initComponents();
         initComboBoxes();
         initButtons();
         if(getDevice() >= 0)
@@ -231,13 +237,9 @@ public class ImporterUI extends JFrame{
         }
     }
 
-    private void initForm(){
+    private void initComponents(){
         progressBar.setVisible(false);
         importLabel.setVisible(false);
-        setContentPane(panel1);
-        setVisible(true);
-        setFocusable(true);
-        setSize(1000,1000);
         imagePreviewPanel.setSize(500,500);
         setLocationRelativeTo(null);
         addKeyListener(new KeyAdapter() {

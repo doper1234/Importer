@@ -41,8 +41,8 @@ public class Logger {
         log(message, "Error");
     }
 
-    public static void logError(Throwable throwabke){
-        logError(throwabke.getMessage());
+    public static void logError(Throwable throwable){
+        logError(throwable.getMessage());
     }
 
     public static void log(StackTraceElement[] stackTrace) {

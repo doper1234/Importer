@@ -3,13 +3,9 @@ import ErrorHandle.ExceptionForm;
 import Help.BasicHelp;
 import Help.FileData;
 import Help.Logger;
-import Help.Settings;
-import Importer.Importer;
+import Settings.Settings;
 import Importer.ImporterUI;
 import jmtp.PortableDevice;
-
-import java.io.*;
-import java.time.LocalDateTime;
 
 import static DeviceDataManager.DeviceDataManager.devicesAreEqual;
 import static DeviceDataManager.DeviceDataManager.getPortableDevices;
@@ -33,22 +29,17 @@ public class Program {
                 PortableDevice[] devices = deviceDataManager.getPortableDevices();
                 boolean bFirstBoot = true;
                 Logger.log("Starting waiting loop...");
-                double i = 0;
-                double iWaitTime = Settings.getCheckForNewDevicesFrequency();
+                long iWaitTime = Settings.getCheckForNewDevicesFrequency();
                 while (true) {
                     try {
                         if(_importerForm == null)
                             checkIfFirstBootOrNewDevicesAndAskToImport(bFirstBoot, deviceDataManager, devices);
-                            Thread.sleep(1 *   // minutes to sleep
-                                6 *   // seconds to a minute
-                                1000); // milliseconds to a second {
+                            Thread.sleep(iWaitTime);
                         bFirstBoot = false;
-                            i = 0;
                     }
                     catch(Throwable e){
                         new ExceptionForm(e);
                     }
-                    i++;
                 }
             }
         }

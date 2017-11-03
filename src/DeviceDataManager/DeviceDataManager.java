@@ -9,6 +9,7 @@ import jmtp.*;
 import javax.swing.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class DeviceDataManager {
@@ -17,6 +18,44 @@ public class DeviceDataManager {
     private static String _lastInsertedDevice;
     private int amountOfFiles;
     private BigInteger amountOfFilesMemory;
+
+    public static boolean isDeviceOpen(PortableDevice device){
+        try{
+            device.open();
+            device.close();
+            return false;
+        }
+        catch(Exception e){
+            //device was already open
+            return true;
+        }
+    }
+
+    public static PortableDevice getDevice(String sSerial){
+        HashMap<String,PortableDevice> portableDeviceHashMap = getPortableDevicesHash();
+        return portableDeviceHashMap.get(sSerial);
+    }
+
+
+    public static HashMap<String,PortableDevice> getPortableDevicesHash(){
+
+        HashMap<String,PortableDevice> hm = new HashMap<>();
+
+        PortableDeviceManager manager = new PortableDeviceManager();
+        for (PortableDevice portableDevice: manager.getDevices()) {
+            //PortableDeviceType sType = portableDevice.getType();
+            String sClass = String.valueOf(portableDevice.getClass());
+
+            Logger.log(sClass);
+            //if(!isDeviceOpen(portableDevice))
+            portableDevice.open();
+            PredefinedDevice predefinedDevice = Settings.getPredefinedDevice(portableDevice.getSerialNumber());
+            if(predefinedDevice == null || (predefinedDevice != null && !predefinedDevice.ignoreDevice))
+                hm.put(portableDevice.getSerialNumber(),portableDevice);
+            portableDevice.close();
+        }
+        return hm;
+    }
 
     public static PortableDevice[] getPortableDevices(){
         return getPortableDevices(false);
@@ -27,12 +66,13 @@ public class DeviceDataManager {
 
         PortableDeviceManager manager = new PortableDeviceManager();
         for (PortableDevice portableDevice: manager.getDevices()) {
-            try {
+            //PortableDeviceType sType = portableDevice.getType();
+            String sClass = String.valueOf(portableDevice.getClass());
+
+            Logger.log(sClass);
+            //if(!isDeviceOpen(portableDevice))
                 portableDevice.open();
-            } catch (Exception e) {
-                Logger.log("Tried to open an already open device");
-            }
-            PredefinedDevice predefinedDevice = Settings.getPredefinedDevice(portableDevice.getModel());
+            PredefinedDevice predefinedDevice = Settings.getPredefinedDevice(portableDevice.getSerialNumber());
             if(predefinedDevice == null || (predefinedDevice != null && !predefinedDevice.ignoreDevice))
                 lPortableDevices.add(portableDevice);
             if(!bOpenDevices)
@@ -41,84 +81,113 @@ public class DeviceDataManager {
         return lPortableDevices.toArray(new PortableDevice[0]);
     }
 
-    public List<String> getPortableDeviceNames() {
-        List<String> deviceNames = new ArrayList<>();
+    public static String getDeviceFullName(PortableDevice portableDevice) {
+        String sDeviceNameToDisplay;
+        String sFriendlyName = portableDevice.getFriendlyName();
+        String sDeviceModel = portableDevice.getModel();
+        if (!BasicHelp.containsHanScript(sFriendlyName))
+            sDeviceNameToDisplay = sFriendlyName + " (" + sDeviceModel + ")";
+        else
+            sDeviceNameToDisplay = sDeviceModel;
+        return sDeviceNameToDisplay;
+    }
+
+    public List<String[]> getPortableDeviceNames() {
+        List<String[]> deviceNames = new ArrayList<>();
         PortableDevice[] portableDevices = getPortableDevices();
         for (PortableDevice portableDevice : portableDevices) {
-            try {
+            if(!isDeviceOpen(portableDevice))
                 portableDevice.open();
-            } catch (Exception e) {
-                //device is already open
-            }
-            String sDeviceNameToDisplay;
-            String sFriendlyName =portableDevice.getFriendlyName();
-            String sDeviceModel = portableDevice.getModel();
-            if(!BasicHelp.containsHanScript(sFriendlyName))
-                sDeviceNameToDisplay = sFriendlyName + " (" + sDeviceModel + ")";
-            else
-                sDeviceNameToDisplay = sDeviceModel;
-
-            PredefinedDevice predefinedDevice = Settings.getPredefinedDevice(sDeviceModel);
-            if(predefinedDevice == null || (predefinedDevice != null && !predefinedDevice.ignoreDevice))
-                deviceNames.add(sDeviceNameToDisplay);
+            String sDeviceNameToDisplay = getDeviceFullName(portableDevice);
+            PredefinedDevice predefinedDevice = Settings.getPredefinedDevice(portableDevice.getSerialNumber());
+            if (predefinedDevice == null || (predefinedDevice != null && !predefinedDevice.ignoreDevice))
+                deviceNames.add(new String[]{portableDevice.getSerialNumber(),sDeviceNameToDisplay});
             portableDevice.close();
         }
-
         return deviceNames;
     }
 
-    public String getDeviceName(int iDevice){
-        PortableDevice device = getPortableDevices()[iDevice];
-        device.open();
+    public String getDeviceModelName(String iDevice){
+        PortableDevice device = getDevice(iDevice);
+        if(!isDeviceOpen(device))
+            device.open();
         String sName = device.getModel();
         device.close();
         return sName;
     }
 
-    public List<DeviceFileInfo> getDeviceFileNames(int iDevice) {
+    public String getDeviceFriendlyName(String iDevice){
+        PortableDevice device = getDevice(iDevice);
+        if(!isDeviceOpen(device))
+            device.open();
+        String sName = device.getFriendlyName();
+        device.close();
+        return sName;
+    }
+
+    public String getDevicePictureDirectory(PortableDevice device){
+        String folderDirectory;
+        PredefinedDevice predefinedDevice = Settings.getPredefinedDevice(device.getSerialNumber());
+        if(predefinedDevice != null)
+            folderDirectory = predefinedDevice.localPictureDirectory;
+        else
+            folderDirectory = FileData.phonePictureFolder;
+        return folderDirectory;
+
+    }
+
+    public List<DeviceFileInfo> getDeviceFileNames(String sSerial) {
         List<DeviceFileInfo> deviceFilesInfo = new ArrayList<>();
-        PortableDeviceFolderObject targetFolder = null;
-        PortableDevice device = getPortableDevices()[iDevice];
+        PortableDevice device = getDevice(sSerial);
         // Connect to USB tablet
-        device.open();
-        Logger.log("Retrieving files from: " + device.getModel());
+        if(!isDeviceOpen(device))
+            device.open();
+        String folderDirectory = getDevicePictureDirectory(device);
+        Logger.log("Retrieving files from: " + getDeviceFullName(device));
         // Iterate over deviceObjects
         for (PortableDeviceObject object : device.getRootObjects()) {
             // If the object is a storage object
             if (object instanceof PortableDeviceStorageObject) {
                 PortableDeviceStorageObject storage = (PortableDeviceStorageObject) object;
-
-                for (PortableDeviceObject o2 : storage.getChildObjects()) {
-                    try{
-                        if (o2.getOriginalFileName().equalsIgnoreCase(FileData.phonePictureFolder))
-                        {
-                            targetFolder = (PortableDeviceFolderObject) o2;
-                            Logger.log("Target folder: " + o2.getOriginalFileName());
-                        }
-                    }
-                    catch(Exception e){
-                        Logger.log(e.getStackTrace());
-                    }
+                PortableDeviceFolderObject targetFolder = getDeviceFolder(storage, folderDirectory);
+                if(targetFolder == null){
+                    String sMessage = "Folder " + folderDirectory +" not found on device!";
+                    BasicHelp.showMessage(sMessage, "Folder not found!");
+                    Logger.log(sMessage);
+                    break;
                 }
                 createChildren(targetFolder, deviceFilesInfo);
             }
         }
-        getPortableDevices()[iDevice].close();
-        if(deviceFilesInfo.isEmpty()) {
+        device.close();
+        if (deviceFilesInfo.isEmpty())
             deviceFilesInfo.add(DeviceFileInfo.empty());
-        }
         return deviceFilesInfo;
+    }
+
+    private PortableDeviceFolderObject getDeviceFolder(PortableDeviceStorageObject storage, String sFolderName) {
+        PortableDeviceFolderObject targetFolder = null;
+        for (PortableDeviceObject o2 : storage.getChildObjects()) {
+            try{
+                if (o2.getOriginalFileName().equalsIgnoreCase(sFolderName)){
+                    targetFolder = (PortableDeviceFolderObject) o2;
+                    Logger.log("Target folder: " + o2.getOriginalFileName());
+                }
+            }
+            catch(Exception e){
+                Logger.log(e.getStackTrace());
+            }
+        }
+        return targetFolder;
     }
 
     private void createChildren(PortableDeviceObject fileRoot, List<DeviceFileInfo> node) {
 
         if (fileRoot instanceof PortableDeviceFolderObject) {
-
             for (PortableDeviceObject file : ((PortableDeviceFolderObject) fileRoot).getChildObjects()) {
                 createChildren(file, node);
             }
-        }
-        else{
+        }else{
             amountOfFiles++;
             if(amountOfFilesMemory == null)
                 amountOfFilesMemory = new BigInteger(String.valueOf(fileRoot.getSize()));
@@ -134,34 +203,19 @@ public class DeviceDataManager {
     }
 
     public static boolean devicesAreEqual(PortableDevice[] devices, PortableDevice[] updatedDevices) {
-        /*if(devices.length != updatedDevices.length)
-            return false;*/
         Logger.log("Checking for change in list of devices...");
+        if(devices.length != updatedDevices.length)
+            return false;
         for (int i = 0; i < devices.length && i < updatedDevices.length; i++){
             PortableDevice device = devices[i];
             PortableDevice updatedDevice = updatedDevices[i];
-
-            try{
+            if(!isDeviceOpen(device))
                 device.open();
-            }
-            catch(DeviceAlreadyOpenedException e){
-                //Help.Logger.log("Device already open!");
-            }
-
-            try{
+            if(!isDeviceOpen(updatedDevice))
                 updatedDevice.open();
-            }
-            catch(DeviceAlreadyOpenedException e){
-                //Help.Logger.log("Updated device already open!");
-            }
-
-
-            String deviceName = device.getModel();
-            String updatedDeviceName = updatedDevice.getModel();
-
-
-            if(!deviceName.equals(updatedDeviceName))
-            {
+            String deviceName = device.getSerialNumber();
+            String updatedDeviceName = updatedDevice.getSerialNumber();
+            if(!deviceName.equals(updatedDeviceName)){
                 _lastInsertedDevice = updatedDeviceName;
                 device.close();
                 updatedDevice.close();
@@ -169,33 +223,24 @@ public class DeviceDataManager {
             }
             device.close();
             updatedDevice.close();
-
-
         }
         return true;
     }
 
-    public ImageIcon getPortableDeviceIcon(String fileName, int iDevice) {
-        PortableDeviceFolderObject targetFolder = null;
-        PortableDevice device = getPortableDevices()[iDevice];
+    public ImageIcon getPortableDeviceIcon(String fileName, String iDevice) {
+        PortableDevice device = getDevice(iDevice);
         // Connect to USB tablet
-        device.open();
+        if(!isDeviceOpen(device))
+            device.open();
         Logger.log(device.getModel());
         // Iterate over deviceObjects
         String path = null;
+        String sPictureDirectory = getDevicePictureDirectory(device);
         for (PortableDeviceObject object : device.getRootObjects()) {
             // If the object is a storage object
             if (object instanceof PortableDeviceStorageObject) {
                 PortableDeviceStorageObject storage = (PortableDeviceStorageObject) object;
-
-                for (PortableDeviceObject o2 : storage.getChildObjects()) {
-                    if(o2.getOriginalFileName() != null) {
-                        Logger.log(o2.getOriginalFileName());
-                        if (o2.getOriginalFileName().equalsIgnoreCase(FileData.phonePictureFolder))
-                        {targetFolder = (PortableDeviceFolderObject) o2; break;}
-
-                    }
-                }
+                PortableDeviceFolderObject targetFolder = getDeviceFolder(storage,sPictureDirectory);
                 path = searchThroughChildren(targetFolder, device, fileName);
                 if (path != null)
                     break;
@@ -210,7 +255,6 @@ public class DeviceDataManager {
     public String searchThroughChildren(PortableDeviceFolderObject fileRoot, PortableDevice device, String fileName){
         String path;
         if (fileRoot instanceof PortableDeviceFolderObject) {
-            //searchThroughChildren(fileRoot, device, fileName);
             for (PortableDeviceObject file : fileRoot.getChildObjects()) {
                 if (file instanceof PortableDeviceFolderObject) {
                     path = searchThroughChildren((PortableDeviceFolderObject) file, device, fileName);
@@ -226,9 +270,7 @@ public class DeviceDataManager {
                     }
                 }
             }
-        }
-
-        else{
+        }else{
             String orgFileName = fileRoot.getOriginalFileName();
             if (orgFileName.contains(fileName)) {
 
@@ -253,28 +295,17 @@ public class DeviceDataManager {
         Logger.log("First boot; checking for connected devices...");
         List<String> lDeviceNames = new ArrayList<>();
         for (PortableDevice pd: devices) {
-            try {
-                pd.open();
-            }
-            catch(Exception e){
 
-            }
-            String deviceModel = pd.getModel().toLowerCase();
-            String deviceName = pd.getFriendlyName();
-            String deviceDescription = pd.getDescription();
-            String deviceManufacturer = pd.getManufacturer();
-            lDeviceNames.add(deviceModel + "("+ deviceName + ")");
-          /*  if (deviceName.contains("phone"))
-            {
-                pd.close();
-                return true;
-            }*/
+            if(!DeviceDataManager.isDeviceOpen(pd))
+                pd.open();
+            //todo find out how this object is already open.
+            String sDeviceName = getDeviceFullName(pd);
+            lDeviceNames.add(sDeviceName);
             pd.close();
         }
         _lastInsertedDevice = String.join(",", lDeviceNames);
         Logger.log(devices.length + " devices connected.");
         return devices.length > 0;
-        //return false;
     }
 
 }

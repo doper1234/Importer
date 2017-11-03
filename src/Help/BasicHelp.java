@@ -193,5 +193,45 @@ public class BasicHelp {
                 codepoint ->
                         Character.UnicodeScript.of(codepoint) == Character.UnicodeScript.HAN);
     }
+
+    public static boolean isNotEmpty(Object o){
+        return !isEmpty(o);
+    }
+
+    public static boolean isEmpty(Object o){
+        if(o == null)
+            return true;
+        if(o instanceof Integer){
+            return (Integer)o == 0;
+        }
+        if(o instanceof String){
+            String s = (String)o;
+            return s.trim().length() == 0;
+        }
+        return false;
+    }
+
+    public static String getDirectoryPath(Component parent, String sDirectory) {
+        JFileChooser chooser = new JFileChooser();
+        File directory = new java.io.File(sDirectory);
+        if(!directory.exists())
+            showMessage("Directory \"" + sDirectory+ "\" does not exist! Using default  My Documents", "Invalid directory");
+        chooser.setCurrentDirectory(directory);
+        chooser.setDialogTitle("Select destination folder");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setAcceptAllFileFilterUsed(false);
+        if (chooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
+            String sPath = chooser.getSelectedFile().getPath();
+            Logger.log("Picture path set to " + sPath);
+            return sPath;
+        } else {
+            Logger.log("No Selection ");
+            return "";
+        }
+    }
+
+    public static String getCurrentDirectory() {
+        return "C:\\Users\\Chris\\Desktop\\Importer";
+    }
 }
 

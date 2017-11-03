@@ -18,7 +18,8 @@ public class ExceptionForm extends MyJFrame {
     private JPanel mainPanel;
 
     public ExceptionForm(Throwable Throwable){
-        super();
+        //super();
+        initForm();
         m_Throwable = Throwable;
         message = Throwable.getMessage();
         initExceptionData();

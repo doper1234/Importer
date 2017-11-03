@@ -7,6 +7,8 @@ import Settings.Settings;
 import Importer.ImporterUI;
 import jmtp.PortableDevice;
 
+import java.io.File;
+
 import static DeviceDataManager.DeviceDataManager.devicesAreEqual;
 import static DeviceDataManager.DeviceDataManager.getPortableDevices;
 import static DeviceDataManager.DeviceDataManager.thereIsAPhoneConnected;
@@ -19,7 +21,7 @@ public class Program {
     public static ImporterUI _importerForm;
 
     public static void main(String[] args) {
-
+        test();
         try {
             Logger.setupLog();
             Settings.loadSettings();
@@ -29,12 +31,12 @@ public class Program {
                 PortableDevice[] devices = deviceDataManager.getPortableDevices();
                 boolean bFirstBoot = true;
                 Logger.log("Starting waiting loop...");
-                long iWaitTime = Settings.getCheckForNewDevicesFrequency();
                 while (true) {
                     try {
-                        if(_importerForm == null)
+                        long iWaitTime = Settings.getSaveFrequencySettingsInMilliseconds();
+                        if(needNewImporter())
                             checkIfFirstBootOrNewDevicesAndAskToImport(bFirstBoot, deviceDataManager, devices);
-                            Thread.sleep(iWaitTime);
+                        Thread.sleep(iWaitTime);
                         bFirstBoot = false;
                     }
                     catch(Throwable e){
@@ -48,11 +50,15 @@ public class Program {
         }
     }
 
+    private static void test() {
+        File[] files = File.listRoots();
+    }
+
     public static void checkIfFirstBootOrNewDevicesAndAskToImport(boolean bFirstBoot, DeviceDataManager deviceDataManager, PortableDevice[] devices){
         PortableDevice[] updatedDevices = getPortableDevices();
         if ((bFirstBoot && thereIsAPhoneConnected(devices)) || !devicesAreEqual(devices, updatedDevices)) {
             Logger.log("List of devices changed. Asking user if they want to import.");
-            if (_importerForm == null && BasicHelp.askQuestion("Device inserted("+deviceDataManager.getLastInsertedDeviceName()+"), import photos?", "Import")) {
+            if (needNewImporter() && BasicHelp.askQuestion("Device inserted("+deviceDataManager.getLastInsertedDeviceName()+"), import photos?", "Import")) {
                 Logger.log("Starting UI form.");
                 _importerForm = new ImporterUI();
             }
@@ -60,5 +66,9 @@ public class Program {
         else
             Logger.log("No changes in connected devices detected.");
 
+    }
+
+    private static boolean needNewImporter(){
+        return _importerForm == null || _importerForm.isDisposed();
     }
 }

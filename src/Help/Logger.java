@@ -14,17 +14,22 @@ import java.time.LocalDateTime;
 public class Logger {
 
 
-    public static void setupLog() throws IOException {
-        LocalDateTime date = LocalDateTime.now();
-        String logFileName = "Logs\\Log_" + date.getYear() + date.getMonthValue() + date.getDayOfMonth() + ".txt";
-        File fLogFile = new File(logFileName);
-        if(!fLogFile.exists()){
-            fLogFile.getParentFile().mkdirs();
-            fLogFile.createNewFile();
+    public static void setupLog() throws Exception {
+            LocalDateTime date = LocalDateTime.now();
+            String sDirectory = BasicHelp.getCurrentDirectory(); //todo change this
+            String logFileName = sDirectory + "\\Logs\\Log_" + date.getYear() + date.getMonthValue() + date.getDayOfMonth() + ".txt";
+        try {
+            File fLogFile = new File(logFileName);
+            if (!fLogFile.exists()) {
+                fLogFile.getParentFile().mkdirs();
+                fLogFile.createNewFile();
+            }
+            PrintStream out = new PrintStream(new FileOutputStream(logFileName, true));
+            System.setOut(out);
+            Logger.log("Help.Logger setup");
+        }catch(IOException ex){
+            throw new Exception(ex.getMessage() + " " + logFileName);
         }
-        PrintStream out = new PrintStream(new FileOutputStream(logFileName, true));
-        System.setOut(out);
-        Logger.log("Help.Logger setup");
     }
 
     private static void log(String message, String sLogType){

@@ -9,16 +9,20 @@ public abstract class MyJFrame extends JFrame {
 
     public abstract JPanel mainPanel();
 
-    public MyJFrame(String sTitle){
+    /*public MyJFrame(String sTitle){
         super(sTitle);
         initForm();
     }
 
     public MyJFrame(){
         this("");
+    }*/
+    protected void initForm(String sTitle){
+        setTitle(sTitle);
+        initForm();
     }
 
-    private void initForm(){
+    protected void initForm(){
         setContentPane(mainPanel());
         setVisible(true);
         setFocusable(true);

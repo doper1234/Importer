@@ -11,6 +11,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
+import static DeviceDataManager.DeviceDataManager.getDevice;
 import static DeviceDataManager.DeviceDataManager.getPortableDevices;
 
 /**
@@ -22,29 +23,29 @@ public class Importer {
 
     /**
      * Speaks for itself. Import files.
-     * @param iSelection
+     * @param sSelection
      * @param importerUI importer ui, used to update progress bar
      * @param sDirectory destination directory for files
      * @param filesToImport array of files to import
      * @param amountOfFiles amount of files to import
      */
-    public void importFiles(int iSelection, ImporterUI importerUI, String sDirectory, String[] filesToImport, int amountOfFiles){
-        (new Thread(new ImportRunnable(iSelection, amountOfFiles, importerUI, sDirectory, filesToImport))).start();
+    public void importFiles(String sSelection, ImporterUI importerUI, String sDirectory, String[] filesToImport, int amountOfFiles){
+        (new Thread(new ImportRunnable(sSelection, amountOfFiles, importerUI, sDirectory, filesToImport))).start();
     }
 
     /**
      * Import files
-     * @param iSelection index of devices to import from
+     * @param sSelection index of devices to import from
      * @param iAmountOfFiles amount of files to import
      * @param importerUI the ui to update progress
      * @param sDirectory destination directory to import to
      * @param filesToImport array of file names to import
      */
-    private static void importFiles(int iSelection, int iAmountOfFiles, ImporterUI importerUI, String sDirectory, String[] filesToImport) {
+    private static void importFiles(String sSelection, int iAmountOfFiles, ImporterUI importerUI, String sDirectory, String[] filesToImport) {
     m_filesToImport = filesToImport;
         importerUI.startProgress(iAmountOfFiles);
         PortableDeviceFolderObject targetFolder = null;
-        PortableDevice device = getPortableDevices()[iSelection];
+        PortableDevice device = getDevice(sSelection);
         device.open();
 
         // Iterate over deviceObjects
@@ -182,13 +183,13 @@ public class Importer {
 
         private int iAmount;
         private ImporterUI importerUI;
-        private int iSelection;
+        private String sSelection;
         private Boolean bImport = true;
         private String sDirectory;
         private String[] filesToImport;
 
-        public ImportRunnable(int iSelection, int iAmount, ImporterUI importerUI, String sDirectory, String[] filesToImport){
-            this.iSelection = iSelection;
+        public ImportRunnable(String sSelection, int iAmount, ImporterUI importerUI, String sDirectory, String[] filesToImport){
+            this.sSelection = sSelection;
             this.iAmount = iAmount;
             this.importerUI = importerUI;
             this.sDirectory = sDirectory;
@@ -199,7 +200,7 @@ public class Importer {
         public void run() {
             if(bImport)
             {
-                importFiles(iSelection,iAmount, importerUI, sDirectory, filesToImport);
+                importFiles(sSelection,iAmount, importerUI, sDirectory, filesToImport);
                 bImport = false;
             }
 
